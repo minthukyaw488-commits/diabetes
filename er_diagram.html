@@ -1,0 +1,197 @@
+<title>Diabetes DW Schema</title>
+<style>
+  :root{
+    --bg:#eef1f5; --surface:#ffffff; --ink:#1a2432; --muted:#5d6b7d;
+    --line:#cfd7e2; --hair:#e4e9f0;
+    --accent:#2f6fb0; --accent-soft:#e6f0f9;
+    --parent:#1f5c96; --parent-soft:#dcebf8;
+    --pk:#b6821f; --pk-soft:#f6ecd4;
+    --fk:#2f6fb0;
+    --standalone:#7a6cb0; --standalone-soft:#ece7f6;
+    --shadow:0 1px 2px rgba(20,35,60,.08),0 6px 18px rgba(20,35,60,.08);
+  }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    --bg:#0f151d; --surface:#18212e; --ink:#e7edf5; --muted:#9aa8bb;
+    --line:#2b3849; --hair:#232f3f;
+    --accent:#61a5e6; --accent-soft:#16283a;
+    --parent:#71b1ec; --parent-soft:#173049;
+    --pk:#e2b45a; --pk-soft:#33290f;
+    --fk:#61a5e6;
+    --standalone:#a99ce0; --standalone-soft:#241f38;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
+  }}
+  :root[data-theme="dark"]{
+    --bg:#0f151d; --surface:#18212e; --ink:#e7edf5; --muted:#9aa8bb;
+    --line:#2b3849; --hair:#232f3f;
+    --accent:#61a5e6; --accent-soft:#16283a;
+    --parent:#71b1ec; --parent-soft:#173049;
+    --pk:#e2b45a; --pk-soft:#33290f;
+    --fk:#61a5e6;
+    --standalone:#a99ce0; --standalone-soft:#241f38;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);
+    font-family:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;}
+  .wrap{max-width:1220px;margin:0 auto;padding-block:28px;padding-left:16px;padding-right:16px;}
+  header h1{font-size:1.6rem;margin:0 0 4px;letter-spacing:-.01em;text-wrap:balance;}
+  header p{margin:0;color:var(--muted);font-size:.95rem;}
+  .legend{display:flex;flex-wrap:wrap;gap:14px 20px;margin:18px 0 8px;
+    padding:12px 16px;background:var(--surface);border:1px solid var(--line);
+    border-radius:10px;box-shadow:var(--shadow);font-size:.82rem;}
+  .legend span{display:inline-flex;align-items:center;gap:7px;color:var(--muted);}
+  .key{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:4px;
+    font-family:"IBM Plex Mono",monospace;font-size:.62rem;font-weight:600;}
+  .key.pk{background:var(--pk-soft);color:var(--pk);border:1px solid var(--pk);}
+  .key.fk{background:var(--accent-soft);color:var(--fk);border:1px solid var(--fk);}
+  .swatch{width:22px;height:12px;border-radius:3px;}
+
+  .scroll{overflow-x:auto;margin-top:14px;-webkit-overflow-scrolling:touch;}
+  .canvas{position:relative;width:1140px;height:960px;margin:0 auto;}
+  svg.links{position:absolute;inset:0;width:1140px;height:960px;z-index:0;pointer-events:none;}
+
+  .tbl{position:absolute;z-index:1;width:var(--w);background:var(--surface);
+    border:1px solid var(--line);border-radius:11px;box-shadow:var(--shadow);overflow:hidden;}
+  .tbl .cap{padding:11px 14px;display:flex;align-items:baseline;gap:8px;
+    border-bottom:2px solid var(--accent);background:var(--accent-soft);}
+  .tbl.parent .cap{border-bottom-color:var(--parent);background:var(--parent-soft);}
+  .tbl.solo .cap{border-bottom-color:var(--standalone);background:var(--standalone-soft);}
+  .cap b{font-size:1rem;letter-spacing:.01em;}
+  .cap .ko{font-size:.76rem;color:var(--muted);}
+  .row{display:grid;grid-template-columns:20px 1fr auto;align-items:center;gap:9px;
+    height:30px;padding:0 13px;border-top:1px solid var(--hair);font-size:.82rem;}
+  .row:first-of-type{border-top:none;}
+  .row .nm{font-family:"IBM Plex Mono",monospace;font-weight:500;white-space:nowrap;}
+  .row .ty{font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--muted);white-space:nowrap;}
+  .row.k .nm{font-weight:600;}
+  .tag{display:grid;place-items:center;width:19px;height:16px;border-radius:4px;
+    font-family:"IBM Plex Mono",monospace;font-size:.58rem;font-weight:700;}
+  .tag.pk{background:var(--pk-soft);color:var(--pk);border:1px solid var(--pk);}
+  .tag.fk{background:var(--accent-soft);color:var(--fk);border:1px solid var(--fk);}
+
+  .note{margin-top:16px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);
+    border-radius:10px;box-shadow:var(--shadow);font-size:.84rem;color:var(--muted);line-height:1.55;}
+  .note b{color:var(--ink);}
+  .note code{font-family:"IBM Plex Mono",monospace;font-size:.78rem;
+    background:var(--accent-soft);color:var(--fk);padding:1px 5px;border-radius:4px;}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap">
+
+<div class="wrap">
+  <header>
+    <h1>Diabetes Data Warehouse — ER Diagram</h1>
+    <p>BRFSS2021 Diabetes Health Indicators · Normalized (3NF) schema · Oracle</p>
+  </header>
+
+  <div class="legend">
+    <span><span class="key pk">PK</span> Primary Key</span>
+    <span><span class="key fk">FK</span> Foreign Key</span>
+    <span><span class="swatch" style="background:var(--parent-soft);border:1px solid var(--parent)"></span> Parent entity</span>
+    <span><span class="swatch" style="background:var(--accent-soft);border:1px solid var(--accent)"></span> Child entity</span>
+    <span><span class="swatch" style="background:var(--standalone-soft);border:1px solid var(--standalone)"></span> Result store (no FK)</span>
+    <span>Relationship&nbsp; <b style="color:var(--ink)">1 : N</b></span>
+  </div>
+
+  <div class="scroll">
+  <div class="canvas">
+    <svg class="links" viewBox="0 0 1140 960" aria-hidden="true">
+      <defs>
+        <style>
+          .rel{fill:none;stroke:var(--accent);stroke-width:1.6;}
+          .crow{fill:none;stroke:var(--accent);stroke-width:1.6;}
+          .card{fill:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;}
+        </style>
+      </defs>
+
+      <!-- PATIENT anchor right edge ~ (350,150) ; children left edge x=720 -->
+      <!-- to HEALTH_EXAM (720,110) -->
+      <path class="rel" d="M350,150 C540,150 560,110 715,110"/>
+      <text class="card" x="368" y="142">1</text>
+      <g class="crow"><path d="M715,110 l-14,-6 M715,110 l-14,0 M715,110 l-14,6"/></g>
+      <text class="card" x="686" y="100">N</text>
+
+      <!-- to DIAGNOSIS (720,500) -->
+      <path class="rel" d="M350,158 C540,158 560,500 715,500"/>
+      <text class="card" x="368" y="176">1</text>
+      <g class="crow"><path d="M715,500 l-14,-6 M715,500 l-14,0 M715,500 l-14,6"/></g>
+      <text class="card" x="686" y="490">N</text>
+
+      <!-- to LIFESTYLE (720,690) -->
+      <path class="rel" d="M350,166 C540,166 560,690 715,690"/>
+      <text class="card" x="368" y="196">1</text>
+      <g class="crow"><path d="M715,690 l-14,-6 M715,690 l-14,0 M715,690 l-14,6"/></g>
+      <text class="card" x="686" y="680">N</text>
+    </svg>
+
+    <!-- PATIENT (parent) -->
+    <div class="tbl parent" style="--w:300px;left:40px;top:70px;">
+      <div class="cap"><b>PATIENT</b><span class="ko">환자</span></div>
+      <div class="row k"><span class="tag pk">PK</span><span class="nm">patient_id</span><span class="ty">NUMBER(10)</span></div>
+      <div class="row"><span></span><span class="nm">age</span><span class="ty">NUMBER(2)</span></div>
+      <div class="row"><span></span><span class="nm">sex</span><span class="ty">NUMBER(1)</span></div>
+      <div class="row"><span></span><span class="nm">education</span><span class="ty">NUMBER(1)</span></div>
+      <div class="row"><span></span><span class="nm">income</span><span class="ty">NUMBER(2)</span></div>
+    </div>
+
+    <!-- HEALTH_EXAM -->
+    <div class="tbl" style="--w:360px;left:720px;top:20px;">
+      <div class="cap"><b>HEALTH_EXAM</b><span class="ko">건강검사</span></div>
+      <div class="row k"><span class="tag pk">PK</span><span class="nm">exam_id</span><span class="ty">NUMBER(10)</span></div>
+      <div class="row k"><span class="tag fk">FK</span><span class="nm">patient_id</span><span class="ty">NUMBER(10)</span></div>
+      <div class="row"><span></span><span class="nm">bmi</span><span class="ty">NUMBER(3)</span></div>
+      <div class="row"><span></span><span class="nm">high_bp</span><span class="ty">NUMBER(1)</span></div>
+      <div class="row"><span></span><span class="nm">high_chol</span><span class="ty">NUMBER(1)</span></div>
+      <div class="row"><span></span><span class="nm">chol_check</span><span class="ty">NUMBER(1)</span></div>
+      <div class="row"><span></span><span class="nm">gen_hlth</span><span class="ty">NUMBER(1)</span></div>
+      <div class="row"><span></span><span class="nm">ment_hlth</span><span class="ty">NUMBER(2)</span></div>
+      <div class="row"><span></span><span class="nm">phys_hlth</span><span class="ty">NUMBER(2)</span></div>
+      <div class="row"><span></span><span class="nm">diff_walk</span><span class="ty">NUMBER(1)</span></div>
+      <div class="row"><span></span><span class="nm">stroke</span><span class="ty">NUMBER(1)</span></div>
+      <div class="row"><span></span><span class="nm">heart_disease</span><span class="ty">NUMBER(1)</span></div>
+    </div>
+
+    <!-- DIAGNOSIS -->
+    <div class="tbl" style="--w:360px;left:720px;top:440px;">
+      <div class="cap"><b>DIAGNOSIS</b><span class="ko">진단결과</span></div>
+      <div class="row k"><span class="tag pk">PK</span><span class="nm">diag_id</span><span class="ty">NUMBER(10)</span></div>
+      <div class="row k"><span class="tag fk">FK</span><span class="nm">patient_id</span><span class="ty">NUMBER(10)</span></div>
+      <div class="row"><span></span><span class="nm">diabetes_status</span><span class="ty">NUMBER(1)</span></div>
+    </div>
+
+    <!-- LIFESTYLE -->
+    <div class="tbl" style="--w:360px;left:720px;top:620px;">
+      <div class="cap"><b>LIFESTYLE</b><span class="ko">생활습관</span></div>
+      <div class="row k"><span class="tag pk">PK</span><span class="nm">lifestyle_id</span><span class="ty">NUMBER(10)</span></div>
+      <div class="row k"><span class="tag fk">FK</span><span class="nm">patient_id</span><span class="ty">NUMBER(10)</span></div>
+      <div class="row"><span></span><span class="nm">smoker</span><span class="ty">NUMBER(1)</span></div>
+      <div class="row"><span></span><span class="nm">phys_activity</span><span class="ty">NUMBER(1)</span></div>
+      <div class="row"><span></span><span class="nm">fruits</span><span class="ty">NUMBER(1)</span></div>
+      <div class="row"><span></span><span class="nm">veggies</span><span class="ty">NUMBER(1)</span></div>
+      <div class="row"><span></span><span class="nm">hvy_alcohol</span><span class="ty">NUMBER(1)</span></div>
+      <div class="row"><span></span><span class="nm">any_healthcare</span><span class="ty">NUMBER(1)</span></div>
+      <div class="row"><span></span><span class="nm">no_doc_cost</span><span class="ty">NUMBER(1)</span></div>
+    </div>
+
+    <!-- ANALYSIS_RESULT (standalone) -->
+    <div class="tbl solo" style="--w:300px;left:40px;top:620px;">
+      <div class="cap"><b>ANALYSIS_RESULT</b><span class="ko">분석결과</span></div>
+      <div class="row k"><span class="tag pk">PK</span><span class="nm">result_id</span><span class="ty">NUMBER(10)</span></div>
+      <div class="row"><span></span><span class="nm">analysis_name</span><span class="ty">VARCHAR2(100)</span></div>
+      <div class="row"><span></span><span class="nm">category</span><span class="ty">VARCHAR2(100)</span></div>
+      <div class="row"><span></span><span class="nm">metric_value</span><span class="ty">NUMBER(12,4)</span></div>
+      <div class="row"><span></span><span class="nm">created_at</span><span class="ty">DATE</span></div>
+    </div>
+  </div>
+  </div>
+
+  <div class="note">
+    <b>Design notes.</b> One <b>PATIENT</b> (환자) links to its <b>HEALTH_EXAM</b>, <b>LIFESTYLE</b> and
+    <b>DIAGNOSIS</b> records through <code>patient_id</code> (FK → PK). Each child table keeps its own
+    surrogate PK from an Oracle sequence, so the design supports a <b>1 : N</b> relationship (in the current
+    BRFSS dataset every patient has exactly one record each).
+    <b>ANALYSIS_RESULT</b> (분석결과) stores the SQL analysis outputs and holds no FK — it is written by the
+    analysis queries, not linked to a patient. Constraints in the schema: <code>PRIMARY KEY</code>,
+    <code>FOREIGN KEY</code>, <code>NOT NULL</code>, and <code>CHECK</code> (e.g. <code>diabetes_status IN (0,1,2)</code>,
+    <code>sex IN (0,1)</code>, <code>bmi BETWEEN 10 AND 60</code>).
+  </div>
+</div>
