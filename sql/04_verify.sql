@@ -4,7 +4,8 @@
 -- =====================================================================
 
 -- 1) Row counts should all be 236378
-SELECT 'patient'     AS table_name, COUNT(*) AS rows FROM patient
+--    NOTE: "ROWS" is an Oracle reserved word, so we alias as ROW_COUNT.
+SELECT 'patient'     AS table_name, COUNT(*) AS row_count FROM patient
 UNION ALL SELECT 'health_exam', COUNT(*) FROM health_exam
 UNION ALL SELECT 'lifestyle',   COUNT(*) FROM lifestyle
 UNION ALL SELECT 'diagnosis',   COUNT(*) FROM diagnosis;
