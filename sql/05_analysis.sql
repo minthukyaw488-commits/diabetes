@@ -4,6 +4,9 @@
 --          the results in ANALYSIS_RESULT.
 -- Note   : "diabetes_rate" = percentage of people with diabetes
 --          (diabetes_status = 2) within each group.
+-- IMPORTANT (Oracle): seq.NEXTVAL is NOT allowed in a SELECT that has
+--          GROUP BY, so every INSERT wraps the grouped query in a
+--          subquery and selects NEXTVAL from the outer level.
 -- =====================================================================
 
 -- Optional: clear old results before re-running
@@ -31,18 +34,18 @@ JOIN diagnosis d ON d.patient_id = g.patient_id
 GROUP BY age_group
 ORDER BY age_group;
 
--- store Q1
 INSERT INTO analysis_result (result_id, analysis_name, category, metric_value)
-SELECT seq_result.NEXTVAL, 'Diabetes rate by age group', age_group, diabetes_rate
+SELECT seq_result.NEXTVAL, analysis_name, category, metric_value
 FROM (
-    SELECT CASE p.age
+    SELECT 'Diabetes rate by age group' AS analysis_name,
+           CASE p.age
                WHEN 1 THEN '18-24' WHEN 2 THEN '25-29' WHEN 3 THEN '30-34'
                WHEN 4 THEN '35-39' WHEN 5 THEN '40-44' WHEN 6 THEN '45-49'
                WHEN 7 THEN '50-54' WHEN 8 THEN '55-59' WHEN 9 THEN '60-64'
                WHEN 10 THEN '65-69' WHEN 11 THEN '70-74' WHEN 12 THEN '75-79'
-               WHEN 13 THEN '80+' END AS age_group,
+               WHEN 13 THEN '80+' END AS category,
            ROUND(100 * SUM(CASE WHEN d.diabetes_status = 2 THEN 1 ELSE 0 END)
-                 / COUNT(*), 2) AS diabetes_rate
+                 / COUNT(*), 2) AS metric_value
     FROM patient p
     JOIN diagnosis d ON d.patient_id = p.patient_id
     GROUP BY p.age
@@ -62,13 +65,16 @@ GROUP BY p.sex
 ORDER BY p.sex;
 
 INSERT INTO analysis_result (result_id, analysis_name, category, metric_value)
-SELECT seq_result.NEXTVAL, 'Diabetes rate by sex',
-       CASE p.sex WHEN 0 THEN 'Female' ELSE 'Male' END,
-       ROUND(100 * SUM(CASE WHEN d.diabetes_status = 2 THEN 1 ELSE 0 END)
-             / COUNT(*), 2)
-FROM patient p
-JOIN diagnosis d ON d.patient_id = p.patient_id
-GROUP BY p.sex;
+SELECT seq_result.NEXTVAL, analysis_name, category, metric_value
+FROM (
+    SELECT 'Diabetes rate by sex' AS analysis_name,
+           CASE p.sex WHEN 0 THEN 'Female' ELSE 'Male' END AS category,
+           ROUND(100 * SUM(CASE WHEN d.diabetes_status = 2 THEN 1 ELSE 0 END)
+                 / COUNT(*), 2) AS metric_value
+    FROM patient p
+    JOIN diagnosis d ON d.patient_id = p.patient_id
+    GROUP BY p.sex
+);
 COMMIT;
 
 -- =====================================================================
@@ -93,16 +99,17 @@ GROUP BY bmi_cat
 ORDER BY bmi_cat;
 
 INSERT INTO analysis_result (result_id, analysis_name, category, metric_value)
-SELECT seq_result.NEXTVAL, 'Diabetes rate by BMI category', bmi_cat, diabetes_rate
+SELECT seq_result.NEXTVAL, analysis_name, category, metric_value
 FROM (
-    SELECT CASE
+    SELECT 'Diabetes rate by BMI category' AS analysis_name,
+           CASE
                WHEN e.bmi < 18.5 THEN '1_Underweight'
                WHEN e.bmi < 25   THEN '2_Normal'
                WHEN e.bmi < 30   THEN '3_Overweight'
                ELSE                   '4_Obese'
-           END AS bmi_cat,
+           END AS category,
            ROUND(100 * SUM(CASE WHEN d.diabetes_status = 2 THEN 1 ELSE 0 END)
-                 / COUNT(*), 2) AS diabetes_rate
+                 / COUNT(*), 2) AS metric_value
     FROM health_exam e
     JOIN diagnosis d ON d.patient_id = e.patient_id
     GROUP BY CASE
@@ -118,21 +125,24 @@ COMMIT;
 -- Q4. Average BMI and general health: DIABETIC vs NON-DIABETIC
 -- =====================================================================
 SELECT CASE WHEN d.diabetes_status = 2 THEN 'Diabetic' ELSE 'Non-diabetic' END AS grp,
-       COUNT(*)             AS patient_count,
-       ROUND(AVG(e.bmi), 2)      AS avg_bmi,
-       ROUND(AVG(e.gen_hlth), 2) AS avg_gen_hlth,
+       COUNT(*)                   AS patient_count,
+       ROUND(AVG(e.bmi), 2)       AS avg_bmi,
+       ROUND(AVG(e.gen_hlth), 2)  AS avg_gen_hlth,
        ROUND(AVG(e.phys_hlth), 2) AS avg_bad_phys_days
 FROM health_exam e
 JOIN diagnosis d ON d.patient_id = e.patient_id
 GROUP BY CASE WHEN d.diabetes_status = 2 THEN 'Diabetic' ELSE 'Non-diabetic' END;
 
 INSERT INTO analysis_result (result_id, analysis_name, category, metric_value)
-SELECT seq_result.NEXTVAL, 'Average BMI (diabetic vs non-diabetic)',
-       CASE WHEN d.diabetes_status = 2 THEN 'Diabetic' ELSE 'Non-diabetic' END,
-       ROUND(AVG(e.bmi), 2)
-FROM health_exam e
-JOIN diagnosis d ON d.patient_id = e.patient_id
-GROUP BY CASE WHEN d.diabetes_status = 2 THEN 'Diabetic' ELSE 'Non-diabetic' END;
+SELECT seq_result.NEXTVAL, analysis_name, category, metric_value
+FROM (
+    SELECT 'Average BMI (diabetic vs non-diabetic)' AS analysis_name,
+           CASE WHEN d.diabetes_status = 2 THEN 'Diabetic' ELSE 'Non-diabetic' END AS category,
+           ROUND(AVG(e.bmi), 2) AS metric_value
+    FROM health_exam e
+    JOIN diagnosis d ON d.patient_id = e.patient_id
+    GROUP BY CASE WHEN d.diabetes_status = 2 THEN 'Diabetic' ELSE 'Non-diabetic' END
+);
 COMMIT;
 
 -- =====================================================================
@@ -168,13 +178,16 @@ GROUP BY l.phys_activity
 ORDER BY risk_factor, has_factor;
 
 INSERT INTO analysis_result (result_id, analysis_name, category, metric_value)
-SELECT seq_result.NEXTVAL, 'Diabetes rate by HighBP',
-       CASE e.high_bp WHEN 1 THEN 'HighBP=Yes' ELSE 'HighBP=No' END,
-       ROUND(100 * SUM(CASE WHEN d.diabetes_status = 2 THEN 1 ELSE 0 END)
-             / COUNT(*), 2)
-FROM health_exam e
-JOIN diagnosis d ON d.patient_id = e.patient_id
-GROUP BY e.high_bp;
+SELECT seq_result.NEXTVAL, analysis_name, category, metric_value
+FROM (
+    SELECT 'Diabetes rate by HighBP' AS analysis_name,
+           CASE e.high_bp WHEN 1 THEN 'HighBP=Yes' ELSE 'HighBP=No' END AS category,
+           ROUND(100 * SUM(CASE WHEN d.diabetes_status = 2 THEN 1 ELSE 0 END)
+                 / COUNT(*), 2) AS metric_value
+    FROM health_exam e
+    JOIN diagnosis d ON d.patient_id = e.patient_id
+    GROUP BY e.high_bp
+);
 COMMIT;
 
 -- =====================================================================
@@ -201,21 +214,24 @@ GROUP BY risk_count
 ORDER BY risk_count;
 
 INSERT INTO analysis_result (result_id, analysis_name, category, metric_value)
-SELECT seq_result.NEXTVAL, 'Diabetes rate by number of risk factors',
-       TO_CHAR(risk_count) || ' risk factors',
-       ROUND(100 * SUM(CASE WHEN d.diabetes_status = 2 THEN 1 ELSE 0 END)
-             / COUNT(*), 2)
+SELECT seq_result.NEXTVAL, analysis_name, category, metric_value
 FROM (
-    SELECT p.patient_id,
-           ( e.high_bp + e.high_chol + l.smoker
-           + CASE WHEN l.phys_activity = 0 THEN 1 ELSE 0 END
-           + CASE WHEN e.bmi >= 30 THEN 1 ELSE 0 END ) AS risk_count
-    FROM patient p
-    JOIN health_exam e ON e.patient_id = p.patient_id
-    JOIN lifestyle   l ON l.patient_id = p.patient_id
-) r
-JOIN diagnosis d ON d.patient_id = r.patient_id
-GROUP BY risk_count;
+    SELECT 'Diabetes rate by number of risk factors' AS analysis_name,
+           TO_CHAR(risk_count) || ' risk factors' AS category,
+           ROUND(100 * SUM(CASE WHEN d.diabetes_status = 2 THEN 1 ELSE 0 END)
+                 / COUNT(*), 2) AS metric_value
+    FROM (
+        SELECT p.patient_id,
+               ( e.high_bp + e.high_chol + l.smoker
+               + CASE WHEN l.phys_activity = 0 THEN 1 ELSE 0 END
+               + CASE WHEN e.bmi >= 30 THEN 1 ELSE 0 END ) AS risk_count
+        FROM patient p
+        JOIN health_exam e ON e.patient_id = p.patient_id
+        JOIN lifestyle   l ON l.patient_id = p.patient_id
+    ) r
+    JOIN diagnosis d ON d.patient_id = r.patient_id
+    GROUP BY risk_count
+);
 COMMIT;
 
 -- =====================================================================
