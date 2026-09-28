@@ -167,16 +167,17 @@ page(s);
 // ============================================================ 8. 실행 화면 (evidence)
 s = p.addSlide(); s.background={color:PAPER};
 head(s,"실행 화면","SQL Developer 구현 증거");
+// two landscape panels (ratio 1.54): each ~5.75 wide -> 3.73 tall
 // left: DDL success
-s.addShape(p.ShapeType.rect, { x:M-0.03, y:2.02, w:6.26, h:4.06, fill:{color:PAPER}, line:{color:HAIR,width:1} });
-s.addImage({ path:IMG+"evidence_ddl.jpg", x:M, y:2.05, w:6.2, h:4.0 });
+s.addShape(p.ShapeType.rect, { x:M-0.03, y:2.12, w:5.81, h:3.79, fill:{color:PAPER}, line:{color:HAIR,width:1} });
+s.addImage({ path:IMG+"evidence_ddl.jpg", x:M, y:2.15, w:5.75, h:3.73 });
 s.addText([{text:"DDL 실행   ",options:{bold:true,color:TEAL}},{text:"테이블·시퀀스 생성 완료",options:{color:MUT}}],
-  { x:M, y:6.2, w:6.2, h:0.35, isTextBox:true, margin:0, fontFace:F, fontSize:12 });
-// right: SELECT result
-s.addShape(p.ShapeType.rect, { x:7.27, y:2.02, w:4.06, h:4.06, fill:{color:PAPER}, line:{color:HAIR,width:1} });
-s.addImage({ path:IMG+"evidence_select.png", x:7.3, y:2.05, w:4.0, h:4.0 });
-s.addText([{text:"SELECT 확인   ",options:{bold:true,color:TEAL}},{text:"데이터 정상 조회",options:{color:MUT}}],
-  { x:7.3, y:6.2, w:4.5, h:0.35, isTextBox:true, margin:0, fontFace:F, fontSize:12 });
+  { x:M, y:6.05, w:5.75, h:0.35, isTextBox:true, margin:0, fontFace:F, fontSize:12 });
+// right: JOIN result
+s.addShape(p.ShapeType.rect, { x:6.72, y:2.12, w:5.81, h:3.79, fill:{color:PAPER}, line:{color:HAIR,width:1} });
+s.addImage({ path:IMG+"evidence_join.jpg", x:6.75, y:2.15, w:5.75, h:3.73 });
+s.addText([{text:"JOIN 조회   ",options:{bold:true,color:TEAL}},{text:"4개 테이블 연결 · 정상 조회",options:{color:MUT}}],
+  { x:6.75, y:6.05, w:5.75, h:0.35, isTextBox:true, margin:0, fontFace:F, fontSize:12 });
 page(s);
 
 // ============================================================ 9. ANALYSIS PLAN (2단계 예고)
