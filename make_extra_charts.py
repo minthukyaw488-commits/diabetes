@@ -10,9 +10,7 @@ def q(s): return pd.read_sql(s, con)
 
 TEAL="#0E8080"; TEALLT="#9FC9C8"; CORAL="#E06D4F"; AMBER="#E9A66B"; INK="#1E2A2A"; MUT="#6E8383"; DEEP="#0C3B3B"
 
-fig, ax = plt.subplots(2, 2, figsize=(13, 9), dpi=150)
-fig.suptitle("Additional SQL Analyses — Socio-economic, Protective & Combination",
-             fontsize=16, fontweight="bold", color=DEEP, y=0.98)
+fig, ax = plt.subplots(2, 2, figsize=(13, 8.4), dpi=150)
 
 def bars(a, labels, vals, colors, title, xlabel=None):
     b = a.bar(range(len(vals)), vals, color=colors, width=0.7)
@@ -51,6 +49,6 @@ lbl = ["정상혈압\n+정상체중","정상혈압\n+비만","고혈압\n+정상
 bars(ax[1,1], lbl, comb.r.tolist(), [TEAL, TEALLT, AMBER, CORAL],
      "④ 고혈압 × 비만 조합 (겹칠수록 ↑)")
 
-plt.tight_layout(rect=[0,0,1,0.96])
+plt.tight_layout()
 plt.savefig("extra_analysis_charts.png", bbox_inches="tight", facecolor="white")
 print("saved extra_analysis_charts.png")
