@@ -175,8 +175,8 @@ s.addText([{text:"DDL 실행   ",options:{bold:true,color:TEAL}},{text:"테이�
   { x:M, y:6.05, w:5.75, h:0.35, isTextBox:true, margin:0, fontFace:F, fontSize:12 });
 // right: JOIN result
 s.addShape(p.ShapeType.rect, { x:6.72, y:2.12, w:5.81, h:3.79, fill:{color:PAPER}, line:{color:HAIR,width:1} });
-s.addImage({ path:IMG+"evidence_join.jpg", x:6.75, y:2.15, w:5.75, h:3.73 });
-s.addText([{text:"JOIN 조회   ",options:{bold:true,color:TEAL}},{text:"4개 테이블 연결 · 정상 조회",options:{color:MUT}}],
+s.addImage({ path:IMG+"evidence_verify.jpg", x:6.75, y:2.15, w:5.75, h:3.73 });
+s.addText([{text:"행 수 검증   ",options:{bold:true,color:TEAL}},{text:"4개 테이블 모두 236,378건",options:{color:MUT}}],
   { x:6.75, y:6.05, w:5.75, h:0.35, isTextBox:true, margin:0, fontFace:F, fontSize:12 });
 page(s);
 
