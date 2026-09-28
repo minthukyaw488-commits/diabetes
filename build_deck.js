@@ -12,7 +12,7 @@ const IMG="/home/user/diabetes/";
 
 let N=1;
 function page(s, dark){ N++;
-  s.addText(String(N).padStart(2,"0")+"  /  11", { x:W-2.0, y:H-0.52, w:1.5, h:0.3,
+  s.addText(String(N).padStart(2,"0")+"  /  09", { x:W-2.0, y:H-0.52, w:1.5, h:0.3,
     isTextBox:true, align:"right", margin:0, fontFace:F, fontSize:9,
     color: dark?TEALLT:MUT, charSpacing:1 });
 }
@@ -164,47 +164,32 @@ s.addText([{text:"결과   ",options:{bold:true,color:TEAL}},
   { x:M, y:5.55, w:11.7, h:0.4, isTextBox:true, margin:0, fontFace:F, fontSize:14 });
 page(s);
 
-// ============================================================ 8. KEY FINDING (hero)
-s = p.addSlide(); s.background={color:DEEP};
-kicker(s,"핵심 발견",true);
-s.addText("위험요인이 겹칠수록\n위험은 급격히 커집니다", { x:M, y:1.2, w:7.2, h:1.7, isTextBox:true, margin:0,
-  fontFace:F, fontSize:30, bold:true, color:PAPER, lineSpacingMultiple:1.15 });
-s.addText([{text:"2.6",options:{color:TEALLT}},{text:"%",options:{color:TEALLT,fontSize:22}}],
-  { x:M, y:3.5, w:3, h:1, isTextBox:true, margin:0, fontFace:F, fontSize:50, bold:true });
-s.addText("위험요인 0개", { x:M, y:4.55, w:3, h:0.35, isTextBox:true, margin:0, fontFace:F, fontSize:13, color:TEALLT });
-s.addText("→", { x:M+2.7, y:3.55, w:0.9, h:0.9, isTextBox:true, align:"center", valign:"middle", margin:0, fontFace:F, fontSize:30, color:MUT });
-s.addText([{text:"46.4",options:{color:CORAL}},{text:"%",options:{color:CORAL,fontSize:22}}],
-  { x:M+3.7, y:3.5, w:2.6, h:1, isTextBox:true, margin:0, fontFace:F, fontSize:50, bold:true });
-s.addText("위험요인 5개 — 약 18배", { x:M+3.7, y:4.55, w:3.0, h:0.35, isTextBox:true, margin:0, fontFace:F, fontSize:13, color:"F1C9B8" });
-s.addImage({ path:IMG+"fig_risk.png", x:7.7, y:1.75, w:5.0, h:3.05 });
-s.addText("위험요인 개수별 당뇨병 비율 — 고혈압·고콜레스테롤·흡연·운동부족·비만",
-  { x:7.7, y:4.85, w:5.0, h:0.6, isTextBox:true, margin:0, fontFace:F, fontSize:10.5, color:MUT, align:"center" });
-page(s, true);
-
-// ============================================================ 9. ANALYSIS 1
+// ============================================================ 8. ANALYSIS PLAN (2단계 예고)
 s = p.addSlide(); s.background={color:PAPER};
-head(s,"분석 결과 ①","연령과 체중이 미치는 영향");
-s.addImage({ path:IMG+"fig_age_bmi.png", x:1.15, y:2.0, w:11.0, h:4.26 });
-s.addText("나이가 많을수록, BMI가 높을수록 당뇨병 비율이 뚜렷하게 증가합니다.",
-  { x:M, y:6.55, w:11.7, h:0.4, isTextBox:true, margin:0, fontFace:F, fontSize:13.5, color:INK });
+head(s,"분석 계획","2단계에서 수행할 분석");
+s.addText("정규화된 DB를 SQL로 질의해 위험요인을 규명하고, 그 결과를 ANALYSIS_RESULT 테이블에 저장합니다.",
+  { x:M, y:1.75, w:11.3, h:0.5, isTextBox:true, margin:0, fontFace:F, fontSize:14.5, color:MUT });
+hair(s, M, 2.5, W-2*M);
+const plan=[["기술 통계 분석","연령·성별·BMI·소득·학력별 당뇨병 비율","GROUP BY · CASE · AVG"],
+            ["조합 · 상호작용","위험요인 개수, 고혈압 × 비만 등 복합 위험","다중 조건 집계"],
+            ["통계 검정","요인별 오즈비(Odds Ratio) · 카이제곱 검정","이진 데이터에 적합"],
+            ["예측 모델링","로지스틱 회귀로 위험요인 기여도 추정","2 · 3단계 진행"]];
+let py2=2.75;
+plan.forEach((c,i)=>{
+  s.addText(String(i+1).padStart(2,"0"), { x:M, y:py2, w:0.9, h:0.85, isTextBox:true, valign:"middle", margin:0, fontFace:F, fontSize:24, bold:true, color:MIST });
+  s.addText(c[0], { x:M+1.05, y:py2, w:3.6, h:0.85, isTextBox:true, valign:"middle", margin:0, fontFace:F, fontSize:15.5, bold:true, color:INK });
+  s.addText(c[1], { x:M+4.75, y:py2, w:5.2, h:0.85, isTextBox:true, valign:"middle", margin:0, fontFace:F, fontSize:13, color:MUT });
+  s.addText(c[2], { x:M+10.0, y:py2, w:1.7, h:0.85, isTextBox:true, valign:"middle", margin:0, fontFace:F, fontSize:10.5, color:TEAL });
+  py2+=0.98; if(i<plan.length-1) hair(s, M, py2-0.1, W-2*M);
+});
+s.addText("분석 결과 저장 테이블(ANALYSIS_RESULT)까지 1단계에서 설계 완료 → 2단계에서 채웁니다.",
+  { x:M, y:6.75, w:11.7, h:0.35, isTextBox:true, margin:0, fontFace:F, fontSize:12, italic:true, color:TEAL });
 page(s);
 
-// ============================================================ 10. ANALYSIS 2
+// ============================================================ 9. CONCLUSION + TEAM
 s = p.addSlide(); s.background={color:PAPER};
-head(s,"분석 결과 ②","사회요인 · 보호요인 · 조합효과");
-s.addImage({ path:IMG+"fig_social.png", x:M, y:2.05, w:11.7, h:3.7 });
-hair(s, M, 6.05, W-2*M);
-s.addText([{text:"소득·학력↓ ",options:{bold:true,color:INK}},{text:"위험↑    ",options:{color:MUT}},
-  {text:"운동 ",options:{bold:true,color:INK}},{text:"위험 절반↓    ",options:{color:MUT}},
-  {text:"고혈압+비만 ",options:{bold:true,color:INK}},{text:"4.6% → 31.3%",options:{color:CORAL,bold:true}}],
-  { x:M, y:6.25, w:11.7, h:0.5, isTextBox:true, margin:0, fontFace:F, fontSize:13.5 });
-page(s);
-
-// ============================================================ 11. CONCLUSION + TEAM
-s = p.addSlide(); s.background={color:PAPER};
-kicker(s,"결론",false);
-s.addText([{text:"고혈압·비만·고령",options:{color:TEAL,bold:true}},{text:"이 핵심 위험요인이며,\n",options:{color:INK}},
-  {text:"운동과 사회적 여건",options:{color:TEAL,bold:true}},{text:"이 이를 완화합니다.",options:{color:INK}}],
+kicker(s,"1단계 마무리",false);
+s.addText([{text:"주제 · 데이터 · DB 설계 · 데이터 입력",options:{color:TEAL,bold:true}},{text:"까지\n1단계를 완료했습니다.",options:{color:INK}}],
   { x:M, y:1.15, w:11.3, h:1.4, isTextBox:true, margin:0, fontFace:F, fontSize:25, bold:true, lineSpacingMultiple:1.18 });
 hair(s, M, 3.05, W-2*M);
 s.addText("역할 분담", { x:M, y:3.3, w:5, h:0.35, isTextBox:true, margin:0, fontFace:F, fontSize:12, bold:true, color:TEAL, charSpacing:2 });
