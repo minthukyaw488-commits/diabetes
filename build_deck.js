@@ -12,7 +12,7 @@ const IMG="/home/user/diabetes/";
 
 let N=1;
 function page(s, dark){ N++;
-  s.addText(String(N).padStart(2,"0")+"  /  09", { x:W-2.0, y:H-0.52, w:1.5, h:0.3,
+  s.addText(String(N).padStart(2,"0")+"  /  10", { x:W-2.0, y:H-0.52, w:1.5, h:0.3,
     isTextBox:true, align:"right", margin:0, fontFace:F, fontSize:9,
     color: dark?TEALLT:MUT, charSpacing:1 });
 }
@@ -164,7 +164,22 @@ s.addText([{text:"결과   ",options:{bold:true,color:TEAL}},
   { x:M, y:5.55, w:11.7, h:0.4, isTextBox:true, margin:0, fontFace:F, fontSize:14 });
 page(s);
 
-// ============================================================ 8. ANALYSIS PLAN (2단계 예고)
+// ============================================================ 8. 실행 화면 (evidence)
+s = p.addSlide(); s.background={color:PAPER};
+head(s,"실행 화면","SQL Developer 구현 증거");
+// left: DDL success
+s.addShape(p.ShapeType.rect, { x:M-0.03, y:2.02, w:6.26, h:4.06, fill:{color:PAPER}, line:{color:HAIR,width:1} });
+s.addImage({ path:IMG+"evidence_ddl.jpg", x:M, y:2.05, w:6.2, h:4.0 });
+s.addText([{text:"DDL 실행   ",options:{bold:true,color:TEAL}},{text:"테이블·시퀀스 생성 완료",options:{color:MUT}}],
+  { x:M, y:6.2, w:6.2, h:0.35, isTextBox:true, margin:0, fontFace:F, fontSize:12 });
+// right: SELECT result
+s.addShape(p.ShapeType.rect, { x:7.27, y:2.02, w:4.06, h:4.06, fill:{color:PAPER}, line:{color:HAIR,width:1} });
+s.addImage({ path:IMG+"evidence_select.png", x:7.3, y:2.05, w:4.0, h:4.0 });
+s.addText([{text:"SELECT 확인   ",options:{bold:true,color:TEAL}},{text:"데이터 정상 조회",options:{color:MUT}}],
+  { x:7.3, y:6.2, w:4.5, h:0.35, isTextBox:true, margin:0, fontFace:F, fontSize:12 });
+page(s);
+
+// ============================================================ 9. ANALYSIS PLAN (2단계 예고)
 s = p.addSlide(); s.background={color:PAPER};
 head(s,"분석 계획","2단계에서 수행할 분석");
 s.addText("정규화된 DB를 SQL로 질의해 위험요인을 규명하고, 그 결과를 ANALYSIS_RESULT 테이블에 저장합니다.",
