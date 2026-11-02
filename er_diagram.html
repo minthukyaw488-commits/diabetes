@@ -7,6 +7,7 @@
     --parent:#1f5c96; --parent-soft:#dcebf8;
     --pk:#b6821f; --pk-soft:#f6ecd4;
     --fk:#2f6fb0;
+    --uq:#2e8b6f; --uq-soft:#dcf1ea;
     --standalone:#7a6cb0; --standalone-soft:#ece7f6;
     --shadow:0 1px 2px rgba(20,35,60,.08),0 6px 18px rgba(20,35,60,.08);
   }
@@ -17,6 +18,7 @@
     --parent:#71b1ec; --parent-soft:#173049;
     --pk:#e2b45a; --pk-soft:#33290f;
     --fk:#61a5e6;
+    --uq:#5cc3a3; --uq-soft:#123026;
     --standalone:#a99ce0; --standalone-soft:#241f38;
     --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
   }}
@@ -27,6 +29,7 @@
     --parent:#71b1ec; --parent-soft:#173049;
     --pk:#e2b45a; --pk-soft:#33290f;
     --fk:#61a5e6;
+    --uq:#5cc3a3; --uq-soft:#123026;
     --standalone:#a99ce0; --standalone-soft:#241f38;
     --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
   }
@@ -44,6 +47,7 @@
     font-family:"IBM Plex Mono",monospace;font-size:.62rem;font-weight:600;}
   .key.pk{background:var(--pk-soft);color:var(--pk);border:1px solid var(--pk);}
   .key.fk{background:var(--accent-soft);color:var(--fk);border:1px solid var(--fk);}
+  .key.uq{background:var(--uq-soft);color:var(--uq);border:1px solid var(--uq);width:auto;padding:0 5px;}
   .swatch{width:22px;height:12px;border-radius:3px;}
 
   .scroll{overflow-x:auto;margin-top:14px;-webkit-overflow-scrolling:touch;}
@@ -64,6 +68,9 @@
   .row .nm{font-family:"IBM Plex Mono",monospace;font-weight:500;white-space:nowrap;}
   .row .ty{font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--muted);white-space:nowrap;}
   .row.k .nm{font-weight:600;}
+  .mini-uq{display:inline-block;margin-left:7px;font-family:"IBM Plex Mono",monospace;
+    font-size:.56rem;font-weight:700;letter-spacing:.03em;color:var(--uq);background:var(--uq-soft);
+    border:1px solid var(--uq);border-radius:4px;padding:1px 4px;vertical-align:middle;}
   .tag{display:grid;place-items:center;width:19px;height:16px;border-radius:4px;
     font-family:"IBM Plex Mono",monospace;font-size:.58rem;font-weight:700;}
   .tag.pk{background:var(--pk-soft);color:var(--pk);border:1px solid var(--pk);}
@@ -80,16 +87,17 @@
 <div class="wrap">
   <header>
     <h1>Diabetes Data Warehouse — ER Diagram</h1>
-    <p>BRFSS2021 Diabetes Health Indicators · Normalized (3NF) schema · Oracle</p>
+    <p>BRFSS2021 Diabetes Health Indicators · Normalized (3NF) schema · Oracle · 1:1 (UNIQUE-enforced)</p>
   </header>
 
   <div class="legend">
     <span><span class="key pk">PK</span> Primary Key</span>
     <span><span class="key fk">FK</span> Foreign Key</span>
+    <span><span class="key uq">UNIQUE</span> enforces one row per patient</span>
     <span><span class="swatch" style="background:var(--parent-soft);border:1px solid var(--parent)"></span> Parent entity</span>
     <span><span class="swatch" style="background:var(--accent-soft);border:1px solid var(--accent)"></span> Child entity</span>
     <span><span class="swatch" style="background:var(--standalone-soft);border:1px solid var(--standalone)"></span> Result store (no FK)</span>
-    <span>Relationship&nbsp; <b style="color:var(--ink)">1 : N</b></span>
+    <span>Relationship&nbsp; <b style="color:var(--ink)">1 : 1</b></span>
   </div>
 
   <div class="scroll">
@@ -98,29 +106,34 @@
       <defs>
         <style>
           .rel{fill:none;stroke:var(--accent);stroke-width:1.6;}
-          .crow{fill:none;stroke:var(--accent);stroke-width:1.6;}
+          .tick{fill:none;stroke:var(--accent);stroke-width:1.8;}
           .card{fill:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;}
         </style>
       </defs>
 
       <!-- PATIENT anchor right edge ~ (350,150) ; children left edge x=720 -->
-      <!-- to HEALTH_EXAM (720,110) -->
+      <!-- 1:1 notation = a single "one" tick ( | ) at each end, "1" label on both sides -->
+
+      <!-- to HEALTH_EXAM (715,110) -->
       <path class="rel" d="M350,150 C540,150 560,110 715,110"/>
-      <text class="card" x="368" y="142">1</text>
-      <g class="crow"><path d="M715,110 l-14,-6 M715,110 l-14,0 M715,110 l-14,6"/></g>
-      <text class="card" x="686" y="100">N</text>
+      <line class="tick" x1="360" y1="143" x2="360" y2="157"/>
+      <text class="card" x="372" y="140">1</text>
+      <line class="tick" x1="705" y1="103" x2="705" y2="117"/>
+      <text class="card" x="690" y="100">1</text>
 
-      <!-- to DIAGNOSIS (720,500) -->
+      <!-- to DIAGNOSIS (715,500) -->
       <path class="rel" d="M350,158 C540,158 560,500 715,500"/>
-      <text class="card" x="368" y="176">1</text>
-      <g class="crow"><path d="M715,500 l-14,-6 M715,500 l-14,0 M715,500 l-14,6"/></g>
-      <text class="card" x="686" y="490">N</text>
+      <line class="tick" x1="360" y1="162" x2="360" y2="176"/>
+      <text class="card" x="372" y="174">1</text>
+      <line class="tick" x1="705" y1="493" x2="705" y2="507"/>
+      <text class="card" x="690" y="490">1</text>
 
-      <!-- to LIFESTYLE (720,690) -->
+      <!-- to LIFESTYLE (715,690) -->
       <path class="rel" d="M350,166 C540,166 560,690 715,690"/>
-      <text class="card" x="368" y="196">1</text>
-      <g class="crow"><path d="M715,690 l-14,-6 M715,690 l-14,0 M715,690 l-14,6"/></g>
-      <text class="card" x="686" y="680">N</text>
+      <line class="tick" x1="360" y1="182" x2="360" y2="196"/>
+      <text class="card" x="372" y="194">1</text>
+      <line class="tick" x1="705" y1="683" x2="705" y2="697"/>
+      <text class="card" x="690" y="680">1</text>
     </svg>
 
     <!-- PATIENT (parent) -->
@@ -137,7 +150,7 @@
     <div class="tbl" style="--w:360px;left:720px;top:20px;">
       <div class="cap"><b>HEALTH_EXAM</b><span class="ko">건강검사</span></div>
       <div class="row k"><span class="tag pk">PK</span><span class="nm">exam_id</span><span class="ty">NUMBER(10)</span></div>
-      <div class="row k"><span class="tag fk">FK</span><span class="nm">patient_id</span><span class="ty">NUMBER(10)</span></div>
+      <div class="row k"><span class="tag fk">FK</span><span class="nm">patient_id<span class="mini-uq">UNIQUE</span></span><span class="ty">NUMBER(10)</span></div>
       <div class="row"><span></span><span class="nm">bmi</span><span class="ty">NUMBER(3)</span></div>
       <div class="row"><span></span><span class="nm">high_bp</span><span class="ty">NUMBER(1)</span></div>
       <div class="row"><span></span><span class="nm">high_chol</span><span class="ty">NUMBER(1)</span></div>
@@ -154,7 +167,7 @@
     <div class="tbl" style="--w:360px;left:720px;top:440px;">
       <div class="cap"><b>DIAGNOSIS</b><span class="ko">진단결과</span></div>
       <div class="row k"><span class="tag pk">PK</span><span class="nm">diag_id</span><span class="ty">NUMBER(10)</span></div>
-      <div class="row k"><span class="tag fk">FK</span><span class="nm">patient_id</span><span class="ty">NUMBER(10)</span></div>
+      <div class="row k"><span class="tag fk">FK</span><span class="nm">patient_id<span class="mini-uq">UNIQUE</span></span><span class="ty">NUMBER(10)</span></div>
       <div class="row"><span></span><span class="nm">diabetes_status</span><span class="ty">NUMBER(1)</span></div>
     </div>
 
@@ -162,7 +175,7 @@
     <div class="tbl" style="--w:360px;left:720px;top:620px;">
       <div class="cap"><b>LIFESTYLE</b><span class="ko">생활습관</span></div>
       <div class="row k"><span class="tag pk">PK</span><span class="nm">lifestyle_id</span><span class="ty">NUMBER(10)</span></div>
-      <div class="row k"><span class="tag fk">FK</span><span class="nm">patient_id</span><span class="ty">NUMBER(10)</span></div>
+      <div class="row k"><span class="tag fk">FK</span><span class="nm">patient_id<span class="mini-uq">UNIQUE</span></span><span class="ty">NUMBER(10)</span></div>
       <div class="row"><span></span><span class="nm">smoker</span><span class="ty">NUMBER(1)</span></div>
       <div class="row"><span></span><span class="nm">phys_activity</span><span class="ty">NUMBER(1)</span></div>
       <div class="row"><span></span><span class="nm">fruits</span><span class="ty">NUMBER(1)</span></div>
@@ -185,13 +198,15 @@
   </div>
 
   <div class="note">
-    <b>Design notes.</b> One <b>PATIENT</b> (환자) links to its <b>HEALTH_EXAM</b>, <b>LIFESTYLE</b> and
-    <b>DIAGNOSIS</b> records through <code>patient_id</code> (FK → PK). Each child table keeps its own
-    surrogate PK from an Oracle sequence, so the design supports a <b>1 : N</b> relationship (in the current
-    BRFSS dataset every patient has exactly one record each).
+    <b>Design notes.</b> Each child table — <b>HEALTH_EXAM</b>, <b>LIFESTYLE</b>, <b>DIAGNOSIS</b> — keeps its
+    own surrogate primary key (<code>exam_id</code>, <code>lifestyle_id</code>, <code>diag_id</code>) from an
+    Oracle sequence, and references <b>PATIENT</b> (환자) through <code>patient_id</code> as a
+    <code>FOREIGN KEY</code>. A <code>UNIQUE (patient_id)</code> constraint on every child makes the relationship
+    strictly <b>1 : 1</b> — one patient can have at most one row per table — and blocks duplicate inserts
+    (<code>ORA-00001</code>), so the earlier row-duplication issue cannot recur.
     <b>ANALYSIS_RESULT</b> (분석결과) stores the SQL analysis outputs and holds no FK — it is written by the
-    analysis queries, not linked to a patient. Constraints in the schema: <code>PRIMARY KEY</code>,
-    <code>FOREIGN KEY</code>, <code>NOT NULL</code>, and <code>CHECK</code> (e.g. <code>diabetes_status IN (0,1,2)</code>,
+    analysis queries, not linked to a patient. Other constraints: <code>PRIMARY KEY</code>,
+    <code>NOT NULL</code>, and <code>CHECK</code> (e.g. <code>diabetes_status IN (0,1,2)</code>,
     <code>sex IN (0,1)</code>, <code>bmi BETWEEN 10 AND 60</code>).
   </div>
 </div>
