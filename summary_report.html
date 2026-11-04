@@ -1,0 +1,115 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<style>
+@font-face{font-family:"Nanum";src:url("file:///usr/local/lib/python3.11/dist-packages/koreanize_matplotlib/fonts/NanumGothic.ttf");font-weight:400}
+@font-face{font-family:"Nanum";src:url("file:///usr/local/lib/python3.11/dist-packages/koreanize_matplotlib/fonts/NanumGothicBold.ttf");font-weight:700}
+@font-face{font-family:"Nanum";src:url("file:///usr/local/lib/python3.11/dist-packages/koreanize_matplotlib/fonts/NanumGothicExtraBold.ttf");font-weight:800}
+@page{size:A4;margin:14mm 13mm}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Nanum",sans-serif;color:#17211F;font-size:10.5px;line-height:1.5}
+.ink{color:#17211F}.teal{color:#0E7C74}.coral{color:#DD6B4D}.mut{color:#7C8A87}
+h1{font-size:22px;font-weight:800;letter-spacing:-.3px}
+.sub{color:#7C8A87;font-size:11px;margin-top:3px}
+.bar{height:3px;width:60px;background:#DD6B4D;margin:9px 0 14px}
+h2{font-size:13px;font-weight:800;color:#0C3B3B;margin:16px 0 7px;padding-left:8px;border-left:4px solid #0E7C74}
+table{width:100%;border-collapse:collapse;margin-top:4px}
+th{background:#0E7C74;color:#fff;font-weight:700;font-size:9.5px;text-align:left;padding:5px 8px}
+td{border-bottom:1px solid #E4E9F0;padding:5px 8px;vertical-align:top;font-size:10px}
+tr:nth-child(even) td{background:#F6FAF9}
+.tag{display:inline-block;background:#E3F0EE;color:#0E7C74;border:1px solid #0E7C74;border-radius:4px;
+  padding:0 5px;font-size:8.5px;font-weight:700}
+.tagc{background:#F7E4DD;color:#DD6B4D;border-color:#DD6B4D}
+.row{display:flex;gap:12px;margin-top:6px}
+.col{flex:1}
+.fig{width:100%;border:1px solid #E4E9F0;border-radius:6px;margin-top:4px}
+.cap{font-size:8.5px;color:#7C8A87;margin-top:2px;text-align:center}
+.kpi{display:flex;gap:10px;margin:8px 0}
+.kbox{flex:1;background:#F6FAF9;border:1px solid #E4E9F0;border-radius:6px;padding:8px 10px}
+.kbox .n{font-size:20px;font-weight:800;color:#0E7C74}
+.kbox.c .n{color:#DD6B4D}
+.kbox .l{font-size:9px;color:#7C8A87;margin-top:1px}
+.foot{margin-top:14px;padding-top:8px;border-top:1px solid #E4E9F0;font-size:9px;color:#7C8A87;text-align:center}
+.pill{background:#0A413D;color:#fff;border-radius:5px;padding:7px 11px;font-size:10px;font-weight:700;margin-top:8px}
+</style></head><body>
+
+<h1 class="ink">당뇨병 데이터 웨어하우스 프로젝트</h1>
+<div class="sub">BRFSS 2021 기반 · Oracle DB 설계와 머신러닝 예측 · <b>핵심 요약</b></div>
+<div class="bar"></div>
+
+<div class="kpi">
+  <div class="kbox"><div class="n">236,378</div><div class="l">응답 데이터 (행)</div></div>
+  <div class="kbox"><div class="n">22</div><div class="l">변수 (컬럼)</div></div>
+  <div class="kbox"><div class="n">4+1</div><div class="l">정규화 테이블</div></div>
+  <div class="kbox c"><div class="n">0.444</div><div class="l">최적 모델 macro-F1</div></div>
+</div>
+
+<h2>1. 프로젝트 단계</h2>
+<table>
+<tr><th style="width:14%">단계</th><th style="width:43%">수행 내용</th><th>상태</th></tr>
+<tr><td><b>1단계</b></td><td>주제 선정 · 데이터 전처리 · 정규화 DB(DW) 설계 · Oracle 적재</td><td><span class="tag">완료</span></td></tr>
+<tr><td><b>2단계</b></td><td>Python DB 연동 · 데이터 추출 · 전처리 · 모델링/튜닝 · 암호화 저장</td><td><span class="tag">완료</span></td></tr>
+<tr><td><b>3단계</b></td><td>저장 모델로 예측 · 결과를 DB(ANALYSIS_RESULT)에 저장 · 발표 <span class="mut">(예정)</span></td><td><span class="tag tagc">진행</span></td></tr>
+</table>
+
+<h2>2. 데이터 & 전처리</h2>
+<table>
+<tr><th style="width:22%">항목</th><th>내용</th></tr>
+<tr><td>데이터 출처</td><td>CDC BRFSS 2021 (Kaggle Diabetes Health Indicators) · CSV</td></tr>
+<tr><td>결측치</td><td>0건 — 확인 결과 없음, 추가 처리 불필요</td></tr>
+<tr><td>이상치</td><td>BMI 60 초과 411건 → 상한값 60으로 조정 (범위 12~60)</td></tr>
+<tr><td>데이터 타입</td><td>모든 값 정수형 변환 (DB 저장 최적화)</td></tr>
+<tr><td>파생변수</td><td><b class="coral">risk_count</b> — 고혈압·고콜레스테롤·흡연·비만·심장질환·뇌졸중 합산 (0~6)</td></tr>
+</table>
+
+<h2>3. DB 설계 — 정규화 (3NF) · 1:1 관계</h2>
+<table>
+<tr><th style="width:20%">테이블</th><th style="width:22%">Primary Key</th><th style="width:28%">Foreign Key</th><th>제약</th></tr>
+<tr><td><b>patient</b> 환자</td><td>patient_id</td><td>—</td><td>CHECK (age, sex)</td></tr>
+<tr><td><b>health_exam</b> 건강검사</td><td class="teal"><b>exam_id</b></td><td>patient_id → patient</td><td><span class="tag">UNIQUE</span> CHECK(bmi)</td></tr>
+<tr><td><b>lifestyle</b> 생활습관</td><td class="teal"><b>lifestyle_id</b></td><td>patient_id → patient</td><td><span class="tag">UNIQUE</span></td></tr>
+<tr><td><b>diagnosis</b> 진단결과</td><td class="teal"><b>diag_id</b></td><td>patient_id → patient</td><td><span class="tag">UNIQUE</span> CHECK(status)</td></tr>
+<tr><td><b>analysis_result</b> 분석결과</td><td>result_id</td><td>— (독립 테이블)</td><td>분석/예측 결과 저장</td></tr>
+</table>
+<div class="mut" style="margin-top:5px;font-size:9px">▶ 각 자식 테이블은 고유 PK(surrogate key)를 가지고, patient_id는 FK + <b>UNIQUE</b>로 분리 → PK/FK 분리 + 중복 방지(1:1 유지). 팀 피드백 반영 설계.</div>
+
+<h2>4. 모델링 결과 — 최적 모델: RandomForest</h2>
+<div class="row">
+  <div class="col" style="flex:1.15">
+    <img class="fig" src="file:///home/user/diabetes/s2_fig_models.png">
+    <div class="cap">그림 1. 모델 성능 비교 (macro-F1 · 정확도)</div>
+  </div>
+  <div class="col">
+    <table>
+    <tr><th>모델</th><th>macro-F1</th><th>정확도</th></tr>
+    <tr><td><b class="teal">RandomForest</b> 🏆</td><td><b>0.444</b></td><td>0.758</td></tr>
+    <tr><td>XGBoost</td><td>0.399</td><td>0.841</td></tr>
+    </table>
+    <div style="margin-top:7px;font-size:9.3px;line-height:1.45">
+    <b>선정 이유:</b> XGBoost는 정확도가 높지만 다수 클래스(정상)에 치우쳐 당뇨를 잘 못 잡음.
+    불균형 데이터에서 공정한 지표인 <b class="coral">macro-F1</b> 기준으로
+    <b class="teal">RandomForest</b>를 최종 선택.</div>
+    <div class="pill">튜닝(GridSearch): n_estimators=200, min_samples_leaf=5</div>
+  </div>
+</div>
+
+<h2>5. 평가 & 핵심 인사이트</h2>
+<div class="row">
+  <div class="col">
+    <img class="fig" src="file:///home/user/diabetes/s2_fig_confusion.png">
+    <div class="cap">그림 2. 혼동행렬 — 당뇨 재현율 73%</div>
+  </div>
+  <div class="col">
+    <img class="fig" src="file:///home/user/diabetes/s2_fig_importance.png">
+    <div class="cap">그림 3. 변수 중요도 Top 10</div>
+  </div>
+</div>
+<table style="margin-top:7px">
+<tr><th style="width:26%">핵심 인사이트</th><th>내용</th></tr>
+<tr><td>강한 예측 변수</td><td><b>BMI · 연령 · 소득</b>이 당뇨 예측에 가장 크게 기여</td></tr>
+<tr><td>파생변수 효과</td><td><b class="coral">risk_count</b>가 중요도 상위 4위 → 복합 위험도가 유의미함을 확인</td></tr>
+<tr><td>모델 성능</td><td>당뇨 재현율 73% (실제 당뇨 10명 중 7명 탐지) · 전당뇨는 표본 적어(2%) 한계</td></tr>
+<tr><td>최종 저장</td><td>최적 모델을 <b>암호화 파일</b>(best_model.enc)로 저장 + 불러와 예측 검증 완료</td></tr>
+</table>
+
+<div class="foot">당뇨병 데이터 웨어하우스 프로젝트 · 22619014 양다윗 · 24619042 민뚜쩌 · 24619040 한지은</div>
+
+</body></html>
