@@ -87,17 +87,16 @@
 <div class="wrap">
   <header>
     <h1>Diabetes Data Warehouse — ER Diagram</h1>
-    <p>BRFSS2021 Diabetes Health Indicators · Normalized (3NF) schema · Oracle · 1:1 (UNIQUE-enforced)</p>
+    <p>BRFSS2021 Diabetes Health Indicators · Normalized (3NF) schema · Oracle · 1:N (one patient, many records)</p>
   </header>
 
   <div class="legend">
     <span><span class="key pk">PK</span> Primary Key</span>
     <span><span class="key fk">FK</span> Foreign Key</span>
-    <span><span class="key uq">UNIQUE</span> enforces one row per patient</span>
     <span><span class="swatch" style="background:var(--parent-soft);border:1px solid var(--parent)"></span> Parent entity</span>
     <span><span class="swatch" style="background:var(--accent-soft);border:1px solid var(--accent)"></span> Child entity</span>
     <span><span class="swatch" style="background:var(--standalone-soft);border:1px solid var(--standalone)"></span> Result store (no FK)</span>
-    <span>Relationship&nbsp; <b style="color:var(--ink)">1 : 1</b></span>
+    <span>Relationship&nbsp; <b style="color:var(--ink)">1 : N</b> &nbsp;<span style="color:var(--muted)">(한 환자 → 여러 기록)</span></span>
   </div>
 
   <div class="scroll">
@@ -106,34 +105,35 @@
       <defs>
         <style>
           .rel{fill:none;stroke:var(--accent);stroke-width:1.6;}
+          .crow{fill:none;stroke:var(--accent);stroke-width:1.6;}
           .tick{fill:none;stroke:var(--accent);stroke-width:1.8;}
           .card{fill:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;}
         </style>
       </defs>
 
       <!-- PATIENT anchor right edge ~ (350,150) ; children left edge x=720 -->
-      <!-- 1:1 notation = a single "one" tick ( | ) at each end, "1" label on both sides -->
+      <!-- 1:N notation = "one" tick ( | ) at patient side, crow's foot at child side -->
 
       <!-- to HEALTH_EXAM (715,110) -->
       <path class="rel" d="M350,150 C540,150 560,110 715,110"/>
       <line class="tick" x1="360" y1="143" x2="360" y2="157"/>
       <text class="card" x="372" y="140">1</text>
-      <line class="tick" x1="705" y1="103" x2="705" y2="117"/>
-      <text class="card" x="690" y="100">1</text>
+      <g class="crow"><path d="M715,110 l-14,-6 M715,110 l-14,0 M715,110 l-14,6"/></g>
+      <text class="card" x="686" y="100">N</text>
 
       <!-- to DIAGNOSIS (715,500) -->
       <path class="rel" d="M350,158 C540,158 560,500 715,500"/>
       <line class="tick" x1="360" y1="162" x2="360" y2="176"/>
       <text class="card" x="372" y="174">1</text>
-      <line class="tick" x1="705" y1="493" x2="705" y2="507"/>
-      <text class="card" x="690" y="490">1</text>
+      <g class="crow"><path d="M715,500 l-14,-6 M715,500 l-14,0 M715,500 l-14,6"/></g>
+      <text class="card" x="686" y="490">N</text>
 
       <!-- to LIFESTYLE (715,690) -->
       <path class="rel" d="M350,166 C540,166 560,690 715,690"/>
       <line class="tick" x1="360" y1="182" x2="360" y2="196"/>
       <text class="card" x="372" y="194">1</text>
-      <line class="tick" x1="705" y1="683" x2="705" y2="697"/>
-      <text class="card" x="690" y="680">1</text>
+      <g class="crow"><path d="M715,690 l-14,-6 M715,690 l-14,0 M715,690 l-14,6"/></g>
+      <text class="card" x="686" y="680">N</text>
     </svg>
 
     <!-- PATIENT (parent) -->
@@ -150,7 +150,7 @@
     <div class="tbl" style="--w:360px;left:720px;top:20px;">
       <div class="cap"><b>HEALTH_EXAM</b><span class="ko">건강검사</span></div>
       <div class="row k"><span class="tag pk">PK</span><span class="nm">exam_id</span><span class="ty">NUMBER(10)</span></div>
-      <div class="row k"><span class="tag fk">FK</span><span class="nm">patient_id<span class="mini-uq">UNIQUE</span></span><span class="ty">NUMBER(10)</span></div>
+      <div class="row k"><span class="tag fk">FK</span><span class="nm">patient_id</span><span class="ty">NUMBER(10)</span></div>
       <div class="row"><span></span><span class="nm">bmi</span><span class="ty">NUMBER(3)</span></div>
       <div class="row"><span></span><span class="nm">high_bp</span><span class="ty">NUMBER(1)</span></div>
       <div class="row"><span></span><span class="nm">high_chol</span><span class="ty">NUMBER(1)</span></div>
@@ -167,7 +167,7 @@
     <div class="tbl" style="--w:360px;left:720px;top:440px;">
       <div class="cap"><b>DIAGNOSIS</b><span class="ko">진단결과</span></div>
       <div class="row k"><span class="tag pk">PK</span><span class="nm">diag_id</span><span class="ty">NUMBER(10)</span></div>
-      <div class="row k"><span class="tag fk">FK</span><span class="nm">patient_id<span class="mini-uq">UNIQUE</span></span><span class="ty">NUMBER(10)</span></div>
+      <div class="row k"><span class="tag fk">FK</span><span class="nm">patient_id</span><span class="ty">NUMBER(10)</span></div>
       <div class="row"><span></span><span class="nm">diabetes_status</span><span class="ty">NUMBER(1)</span></div>
     </div>
 
@@ -175,7 +175,7 @@
     <div class="tbl" style="--w:360px;left:720px;top:620px;">
       <div class="cap"><b>LIFESTYLE</b><span class="ko">생활습관</span></div>
       <div class="row k"><span class="tag pk">PK</span><span class="nm">lifestyle_id</span><span class="ty">NUMBER(10)</span></div>
-      <div class="row k"><span class="tag fk">FK</span><span class="nm">patient_id<span class="mini-uq">UNIQUE</span></span><span class="ty">NUMBER(10)</span></div>
+      <div class="row k"><span class="tag fk">FK</span><span class="nm">patient_id</span><span class="ty">NUMBER(10)</span></div>
       <div class="row"><span></span><span class="nm">smoker</span><span class="ty">NUMBER(1)</span></div>
       <div class="row"><span></span><span class="nm">phys_activity</span><span class="ty">NUMBER(1)</span></div>
       <div class="row"><span></span><span class="nm">fruits</span><span class="ty">NUMBER(1)</span></div>
@@ -201,9 +201,10 @@
     <b>Design notes.</b> Each child table — <b>HEALTH_EXAM</b>, <b>LIFESTYLE</b>, <b>DIAGNOSIS</b> — keeps its
     own surrogate primary key (<code>exam_id</code>, <code>lifestyle_id</code>, <code>diag_id</code>) from an
     Oracle sequence, and references <b>PATIENT</b> (환자) through <code>patient_id</code> as a
-    <code>FOREIGN KEY</code>. A <code>UNIQUE (patient_id)</code> constraint on every child makes the relationship
-    strictly <b>1 : 1</b> — one patient can have at most one row per table — and blocks duplicate inserts
-    (<code>ORA-00001</code>), so the earlier row-duplication issue cannot recur.
+    <code>FOREIGN KEY</code>. There is <b>no UNIQUE on patient_id</b>, so one patient can own
+    <b>many</b> child rows — a <b>1 : N</b> relationship. For example a patient can have multiple
+    <b>DIAGNOSIS</b> records over time (한 환자 아래 여러 diag_id). A date/visit column (e.g.
+    <code>diagnosis_date</code>) distinguishes the repeated rows.
     <b>ANALYSIS_RESULT</b> (분석결과) stores the SQL analysis outputs and holds no FK — it is written by the
     analysis queries, not linked to a patient. Other constraints: <code>PRIMARY KEY</code>,
     <code>NOT NULL</code>, and <code>CHECK</code> (e.g. <code>diabetes_status IN (0,1,2)</code>,
