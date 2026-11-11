@@ -12,13 +12,10 @@
 """
 import csv
 import oracledb
+from db_connection import get_connection   # 환경변수에서 접속 정보 로드
 
-# ===== DB 접속 정보 =====
-con = oracledb.connect(
-    user="system",
-    password="Oracle123",              # <- 너의 비밀번호
-    dsn="localhost:1521/FREEPDB1",
-)
+# ===== DB 접속 (.env 의 DB_PASSWORD 사용 — 코드에 비밀번호 없음) =====
+con = get_connection()
 cur = con.cursor()
 print("connected\n")
 

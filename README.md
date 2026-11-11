@@ -38,10 +38,13 @@ SQL 분석과 머신러닝으로 당뇨 위험요인을 규명하는 프로젝�
 
 ### 사전 준비
 ```bash
-pip install oracledb scikit-learn xgboost cryptography "numpy<2"
+pip install -r requirements.txt          # 의존성 설치 (numpy<2 포함)
+cp .env.example .env                      # 접속 정보 템플릿 복사
+#  → .env 파일을 열어 DB_PASSWORD 를 본인 비밀번호로 수정
 # Oracle Free (Docker) 컨테이너가 실행 중이어야 함  →  docker ps
 ```
-> 각 스크립트 상단의 `password`, `dsn`(예: `localhost:1521/FREEPDB1`)을 본인 환경에 맞게 수정.
+> **비밀번호는 코드가 아니라 `.env` 에만** 둡니다 (`.env` 는 git에 올라가지 않음).
+> 접속 로직은 `db_connection.py` 가 환경변수에서 읽습니다.
 
 ### 1) DB 구축 + 데이터 적재
 ```bash

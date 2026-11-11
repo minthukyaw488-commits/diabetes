@@ -1,0 +1,12 @@
+# 2단계 파이프라인 의존성 (재현성 고정)
+# 설치:  pip install -r requirements.txt
+# 주의:  anaconda 기본 환경은 numpy 1.x 로 빌드되어 있어 numpy<2 로 고정
+oracledb>=2.0
+pandas>=2.0
+numpy<2
+scikit-learn>=1.3
+xgboost>=2.0
+cryptography>=42.0
+python-dotenv>=1.0
+matplotlib>=3.7
+koreanize-matplotlib
