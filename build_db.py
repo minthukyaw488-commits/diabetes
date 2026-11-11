@@ -10,8 +10,8 @@
  수행: 1) 기존 정리 → 2) 테이블 생성 → 3) CSV 적재(파이썬) → 4) 분석결과 → 5) 검증
 ===========================================================================
 """
+import csv
 import oracledb
-import pandas as pd
 
 # ===== DB 접속 정보 =====
 con = oracledb.connect(
@@ -98,36 +98,40 @@ run("""CREATE TABLE analysis_result (
      )""")
 
 # ---------------------------------------------------------------------------
-# 3) CSV 적재 (파이썬에서 직접) — 첫 행부터 patient_id 1,2,3...
+# 3) CSV 적재 (파이썬 내장 csv 모듈 — pandas/numpy 불필요) · patient_id 1,2,3...
 # ---------------------------------------------------------------------------
 print("3) diabetes_clean.csv 적재")
-df = pd.read_csv("diabetes_clean.csv")
-df.insert(0, "patient_id", range(1, len(df) + 1))
+with open("diabetes_clean.csv", newline="") as f:
+    records = list(csv.DictReader(f))
+print(f"   읽은 행: {len(records):,}")
 
-def bulk_insert(table, cols_sql, src_cols, chunk=50000):
-    sql = f"INSERT INTO {table} ({cols_sql}) VALUES ({','.join(':'+str(i+1) for i in range(len(src_cols)))})"
-    data = df[src_cols].astype("int64")
-    rows = list(map(tuple, data.itertuples(index=False, name=None)))
+PAT_SRC = ["Age", "Sex", "Education", "Income", "Diabetes_012", "Smoker",
+           "PhysActivity", "Fruits", "Veggies", "HvyAlcoholConsump",
+           "AnyHealthcare", "NoDocbcCost"]
+HX_SRC = ["BMI", "HighBP", "HighChol", "CholCheck", "GenHlth", "MentHlth",
+          "PhysHlth", "DiffWalk", "Stroke", "HeartDiseaseorAttack"]
+
+patient_rows, exam_rows = [], []
+for pid, r in enumerate(records, start=1):
+    patient_rows.append((pid, *(int(float(r[c])) for c in PAT_SRC)))
+    exam_rows.append((pid, *(int(float(r[c])) for c in HX_SRC)))
+
+def bulk_insert(table, cols_sql, rows, chunk=50000):
+    n = cols_sql.count(",") + 1
+    sql = f"INSERT INTO {table} ({cols_sql}) VALUES ({','.join(':'+str(i+1) for i in range(n))})"
     for i in range(0, len(rows), chunk):
         cur.executemany(sql, rows[i:i+chunk])
     con.commit()
     print(f"   {table}: {len(rows):,} rows")
 
-bulk_insert(
-    "patient",
+bulk_insert("patient",
     "patient_id, age, sex, education, income, diabetes_status, "
     "smoker, phys_activity, fruits, veggies, hvy_alcohol, any_healthcare, no_doc_cost",
-    ["patient_id", "Age", "Sex", "Education", "Income", "Diabetes_012",
-     "Smoker", "PhysActivity", "Fruits", "Veggies", "HvyAlcoholConsump",
-     "AnyHealthcare", "NoDocbcCost"],
-)
-bulk_insert(
-    "health_exam",
+    patient_rows)
+bulk_insert("health_exam",
     "patient_id, bmi, high_bp, high_chol, chol_check, gen_hlth, "
     "ment_hlth, phys_hlth, diff_walk, stroke, heart_disease",
-    ["patient_id", "BMI", "HighBP", "HighChol", "CholCheck", "GenHlth",
-     "MentHlth", "PhysHlth", "DiffWalk", "Stroke", "HeartDiseaseorAttack"],
-)
+    exam_rows)
 
 # ---------------------------------------------------------------------------
 # 4) ANALYSIS_RESULT — 환자별 위험요인 개수 (고혈압+고콜레스테롤+비만+건강나쁨, 0~4)
