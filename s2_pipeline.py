@@ -5,7 +5,7 @@
 ---------------------------------------------------------------------------
  평가 항목 커버:
    1) DB 연동        : oracledb 로 1단계 DB 접속
-   2) 데이터 가져오기 : 4개 테이블 JOIN → DataFrame
+   2) 데이터 가져오기 : 2개 테이블(patient·health_exam) JOIN → DataFrame
    3) 전처리         : 결측치/이상치 확인, 파생변수, 스케일링, 분할
    4) 모델링 + 저장   : RandomForest vs XGBoost 비교 + GridSearch 튜닝
                        → 최적 모델을 암호화(pickle) 파일로 저장
@@ -34,19 +34,16 @@ print("① DB 연동 성공 ✅")
 
 # ===========================================================================
 # 2) 필요 데이터 가져오기  [평가 20점]
-#    4개 테이블을 patient_id 로 JOIN → 하나의 DataFrame
+#    patient + health_exam 를 patient_id 로 JOIN → 하나의 DataFrame
 # ===========================================================================
 query = """
     SELECT p.age, p.sex, p.education, p.income,
+           p.diabetes_status, p.smoker, p.phys_activity, p.fruits, p.veggies,
+           p.hvy_alcohol, p.any_healthcare, p.no_doc_cost,
            h.bmi, h.high_bp, h.high_chol, h.chol_check, h.gen_hlth,
-           h.ment_hlth, h.phys_hlth, h.diff_walk, h.stroke, h.heart_disease,
-           l.smoker, l.phys_activity, l.fruits, l.veggies,
-           l.hvy_alcohol, l.any_healthcare, l.no_doc_cost,
-           d.diabetes_status
+           h.ment_hlth, h.phys_hlth, h.diff_walk, h.stroke, h.heart_disease
     FROM patient p
     JOIN health_exam h ON p.patient_id = h.patient_id
-    JOIN lifestyle   l ON p.patient_id = l.patient_id
-    JOIN diagnosis   d ON p.patient_id = d.patient_id
 """
 cur = con.cursor()
 cur.execute(query)

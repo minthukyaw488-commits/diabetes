@@ -64,7 +64,7 @@ s.addText("정규화된 Oracle DB에서 데이터를 불러와 전처리한 뒤,
   { x:M, y:2.85, w:11, h:0.5, isTextBox:true, margin:0, fontFace:F, fontSize:14, color:MUT });
 hair(s, M, 3.7, W-2*M);
 const goals=[["01","Oracle DB 연동 — oracledb"],
-             ["02","필요 데이터 가져오기 — 4개 테이블 JOIN"],
+             ["02","필요 데이터 가져오기 — 2개 테이블 JOIN"],
              ["03","데이터 전처리 — 파생변수·분할"],
              ["04","모델링·튜닝 — 최적 모델 암호화 저장"]];
 goals.forEach((q,i)=>{ const col=i%2,row=Math.floor(i/2);
@@ -78,7 +78,7 @@ page(s);
 s = p.addSlide(); s.background={color:PAPER};
 head(s,"수행 흐름","분석 파이프라인");
 const steps=[["①","DB 연동","oracledb\nFREEPDB1 접속"],
-             ["②","데이터","4개 테이블 JOIN\n→ DataFrame"],
+             ["②","데이터","2개 테이블 JOIN\n→ DataFrame"],
              ["③","전처리","결측치·이상치\n파생변수·분할"],
              ["④","모델링","RF vs XGBoost\nGridSearch 튜닝"],
              ["⑤","저장","암호화 pickle\n(best_model.enc)"]];
@@ -114,8 +114,8 @@ s.addText("236,378", { x:7.25, y:2.4, w:5.5, h:1.1, isTextBox:true, margin:0, fo
 s.addText("행  ·  22개 변수를 하나의 DataFrame으로", { x:7.3, y:3.55, w:5.3, h:0.4, isTextBox:true, margin:0, fontFace:F, fontSize:14, color:MUT });
 hair(s, 7.3, 4.2, 5.2);
 s.addText([
-  {text:"patient  ⋈  health_exam  ⋈  lifestyle  ⋈  diagnosis\n", options:{color:INK, bold:true}},
-  {text:"patient_id 기준 4개 테이블 JOIN", options:{color:MUT}},
+  {text:"patient  ⋈  health_exam\n", options:{color:INK, bold:true}},
+  {text:"patient_id 기준 2개 테이블 JOIN (3-테이블 설계)", options:{color:MUT}},
 ], { x:7.3, y:4.35, w:5.3, h:0.9, isTextBox:true, margin:0, fontFace:F, fontSize:13, lineSpacingMultiple:1.3 });
 s.addText("✓  1단계 DB 접속 성공  ✓  분석에 필요한 전체 변수 확보", { x:M, y:5.6, w:11.7, h:0.4, isTextBox:true, margin:0, fontFace:F, fontSize:13.5, color:TEAL, bold:true });
 page(s);
