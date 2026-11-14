@@ -18,7 +18,11 @@ MODELING_QUERY = """
            h.ment_hlth, h.phys_hlth, h.diff_walk, h.stroke, h.heart_disease
     FROM patient p
     JOIN health_exam h ON p.patient_id = h.patient_id
+    ORDER BY p.patient_id
 """
+# ↑ ORDER BY 필수: Oracle은 ORDER BY가 없으면 행 순서를 보장하지 않는다.
+#   컴퓨터/실행마다 순서가 달라지면 train_test_split 결과도 달라져
+#   모델 성능이 재현되지 않는다. patient_id 로 고정해 '같은 분할·같은 결과'를 보장.
 
 
 def fetch_modeling_data(con):
