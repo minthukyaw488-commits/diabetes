@@ -93,8 +93,11 @@ try:
     for status, cnt in cur.fetchall():
         print(f"     {LABELS[status]}: {cnt:,}건")
 
-    cur.execute("""SELECT patient_id, diabetes_status, predicted_status
-                   FROM analysis_result WHERE predicted_status IS NOT NULL
+    # 실제값(diabetes_status)은 PATIENT 테이블에 있으므로 JOIN 으로 비교
+    cur.execute("""SELECT a.patient_id, p.diabetes_status, a.predicted_status
+                   FROM analysis_result a
+                   JOIN patient p ON p.patient_id = a.patient_id
+                   WHERE a.predicted_status IS NOT NULL
                    FETCH FIRST 5 ROWS ONLY""")
     print("   저장 샘플 (patient_id · 실제 · 예측):")
     for pid_v, actual, predicted in cur.fetchall():
