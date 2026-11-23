@@ -1,10 +1,11 @@
 """
 ===========================================================================
- 프로젝트 3단계 — 저장한 모델로 예측하고 결과를 DB에 저장 (시연용)
+ 프로젝트 3단계 — 저장한 모델로 예측하고 결과를 DB에 저장 (시연용 · 독립 실행)
  ① 암호화 모델 로딩 → ② DB에서 Test Data → ③ 하나씩 예측
  → ④ 결과를 ANALYSIS_RESULT(1단계 테이블)에 저장 → ⑤ 확인
 ---------------------------------------------------------------------------
  평가 3단계 시연(40점): 모델 로딩 · Test Data 적용 · 결과 Table 저장
+ ※ 다른 파일을 import 하지 않는 독립 스크립트 (build_db.py / s2_pipeline.py 와 동일 스타일)
 ===========================================================================
 """
 import warnings; warnings.filterwarnings("ignore")
@@ -15,9 +16,6 @@ from cryptography.fernet import Fernet
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
-from db_connection import get_connection
-from preprocessing import add_derived_features
-
 LABELS = {0: "정상", 1: "전당뇨", 2: "당뇨"}
 
 # ① 2단계에서 저장한 암호화 모델 로딩 -------------------------------------
@@ -25,7 +23,12 @@ key = open("model.key", "rb").read()
 model = pickle.loads(Fernet(key).decrypt(open("best_model.enc", "rb").read()))
 print("① 암호화 모델 로딩 완료:", type(model).__name__)
 
-con = get_connection()
+# ===== DB 접속 (build_db.py / s2_pipeline.py 와 같은 정보로) =====
+con = oracledb.connect(
+    user="system",
+    password="Oracle123",              # <- 너의 비밀번호 (s2_pipeline.py 와 동일하게)
+    dsn="localhost:1521/FREEPDB1",
+)
 try:
     cur = con.cursor()
 
@@ -42,7 +45,13 @@ try:
     cur.execute(QUERY)
     cols = [c[0].lower() for c in cur.description]
     df = pd.DataFrame(cur.fetchall(), columns=cols)
-    df = add_derived_features(df)                    # 학습 때와 동일한 파생변수
+
+    # 파생변수 risk_count (학습 때와 동일)
+    df["risk_count"] = (
+        df["high_bp"] + df["high_chol"] + df["smoker"]
+        + (df["bmi"] >= 30).astype(int)
+        + df["heart_disease"] + df["stroke"]
+    )
 
     # ③ 학습 때와 똑같이 분할해 Test Data 확보 (seed 42) -------------------
     pid = df["patient_id"]
@@ -84,7 +93,6 @@ try:
     for status, cnt in cur.fetchall():
         print(f"     {LABELS[status]}: {cnt:,}건")
 
-    # 저장 결과 샘플 5건 (시연용 — SQL Developer 로도 확인 가능)
     cur.execute("""SELECT patient_id, diabetes_status, predicted_status
                    FROM analysis_result WHERE predicted_status IS NOT NULL
                    FETCH FIRST 5 ROWS ONLY""")
